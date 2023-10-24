@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Data.SqlTypes;
 
 namespace FechasArtistas
 {
@@ -33,8 +34,7 @@ namespace FechasArtistas
         private void buscar_Click(object sender, EventArgs e)
         {
             string artista = busqueda.Text;
-            string searchUrl = "http://www.setlist.fm/search?query=" + artista.Replace(" ", "+");
-            var eventDates = GetArtistEvents(searchUrl, artista);
+            var eventDates = GetArtistEvents(artista);
 
             if (eventDates.Count == 0)
             {
@@ -51,16 +51,23 @@ namespace FechasArtistas
         }
             
         
-        private List<string> GetArtistEvents(string url, string artista)
+        private List<string> GetArtistEvents(string artista)
         {
             List<string> eventDates = new List<string>();
+            int page = 1;
 
-            int totalPages = GetTotalPages(url, artista);
-
-            for (int page = 1; page <= totalPages; page++)
+            while (true)
             {
                 string pageUrl = $"https://www.setlist.fm/search?page={page}&query={artista.Replace(" ", "+")}";
-                eventDates.AddRange(GetEventsOnPage(pageUrl));
+                List<string> pageEventDates = GetEventsOnPage(pageUrl);
+
+                if (pageEventDates.Count == 0)
+                {
+                    break;  // No hay más páginas
+                }
+
+                eventDates.AddRange(pageEventDates);
+                page++;
             }
 
             return eventDates;
@@ -148,6 +155,7 @@ namespace FechasArtistas
 
             return eventDates;
         }
+    
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
