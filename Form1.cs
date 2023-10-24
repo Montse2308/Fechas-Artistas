@@ -34,8 +34,7 @@ namespace FechasArtistas
         {
             string artista = busqueda.Text;
             string searchUrl = "http://www.setlist.fm/search?query=" + artista.Replace(" ", "+");
-
-            var eventDates = GetArtistEvents(searchUrl);
+            var eventDates = GetArtistEvents(searchUrl, artista);
 
             if (eventDates.Count == 0)
             {
@@ -50,7 +49,65 @@ namespace FechasArtistas
                 }
             }
         }
-        private List<string> GetArtistEvents(string url)
+            
+        
+        private List<string> GetArtistEvents(string url, string artista)
+        {
+            List<string> eventDates = new List<string>();
+
+            int totalPages = GetTotalPages(url, artista);
+
+            for (int page = 1; page <= totalPages; page++)
+            {
+                string pageUrl = $"https://www.setlist.fm/search?page={page}&query={artista.Replace(" ", "+")}";
+                eventDates.AddRange(GetEventsOnPage(pageUrl));
+            }
+
+            return eventDates;
+        }
+
+        private int GetTotalPages(string url, string artista)
+        {
+            WebRequest request = WebRequest.Create(url);
+            request.Credentials = CredentialCache.DefaultCredentials;
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new Exception("No se pudo obtener una respuesta. Estado = " + response.StatusCode);
+            }
+
+            using (Stream dataStream = response.GetResponseStream())
+            {
+                if (dataStream == null)
+                {
+                    throw new Exception("No se recibió respuesta.");
+                }
+
+                using (StreamReader reader = new StreamReader(dataStream))
+                {
+                    string html = reader.ReadToEnd();
+                    string pattern = $@"<a href=""search\?page=(\d+)&amp;query={artista.Replace(" ", "+")}"">(\d+)</a>";
+                    MatchCollection matches = Regex.Matches(html, pattern);
+
+                    int totalPages = 1;
+
+                    foreach (Match match in matches)
+                    {
+                        int currentPage = int.Parse(match.Groups[1].Value);
+                        if (currentPage > totalPages)
+                        {
+                            totalPages = currentPage;
+                        }
+                    }
+
+                    return totalPages;
+                }
+            }
+        }
+
+        private List<string> GetEventsOnPage(string url)
         {
             List<string> eventDates = new List<string>();
 
@@ -75,7 +132,6 @@ namespace FechasArtistas
                 {
                     string html = reader.ReadToEnd();
 
-                    // Analizar el HTML directamente para extraer las fechas
                     string pattern = @"<div class=""condensed dateBlock"">\s*<span class=""month"">([^<]+)</span>\s*<span class=""day"">([^<]+)</span>\s*<span class=""year"">([^<]+)</span>";
                     MatchCollection matches = Regex.Matches(html, pattern);
 
