@@ -1,0 +1,10 @@
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\bin\Debug\FechasArtistas.exe.config
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\bin\Debug\FechasArtistas.exe
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\bin\Debug\FechasArtistas.pdb
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\obj\Debug\FechasArtistas.csproj.AssemblyReference.cache
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\obj\Debug\FechasArtistas.Form1.resources
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\obj\Debug\FechasArtistas.Properties.Resources.resources
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\obj\Debug\FechasArtistas.csproj.GenerateResource.cache
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\obj\Debug\FechasArtistas.csproj.CoreCompileInputs.cache
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\obj\Debug\FechasArtistas.exe
+C:\Users\galle\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\ISI\SEMESTRE 5\INTERFACES GRAFICAS\PARCIAL 3\FechasArtistas\obj\Debug\FechasArtistas.pdb
