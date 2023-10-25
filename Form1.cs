@@ -10,12 +10,20 @@ using System.Windows.Forms;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.IO;
-using System.Data.SqlTypes;
+using System.Collections;
+using static System.Net.WebRequestMethods;
+
+/**
+ * HERNANDEZ GALLEGOS MONTSERRAT XIMENA
+ * SOLO COMO ACLARION PROFE, DE QUE LE TENGA PACIENCIA AL CODIGO, TARDA COMO 1 MINUTO EN ARRANCAR, PERO FUNCIONA, ES CULPA DEL WONDOWS FORMS JEJE
+ */
 
 namespace FechasArtistas
 {
     public partial class Form1 : Form
     {
+        private int pageNumber = 1; 
+        private bool hasMorePages = true; 
         public Form1()
         {
             InitializeComponent();
@@ -33,8 +41,25 @@ namespace FechasArtistas
 
         private void buscar_Click(object sender, EventArgs e)
         {
+            
             string artista = busqueda.Text;
-            var eventDates = GetArtistEvents(artista);
+            string baseUrl = "http://www.setlist.fm/search?query=" + artista.Replace(" ", "+");
+
+            List<string> eventDates = new List<string>();
+
+            while (hasMorePages)
+            {
+                string searchUrl = baseUrl + "&page=" + pageNumber;
+                var pageEventDates = GetArtistEvents(searchUrl);
+                eventDates.AddRange(pageEventDates);
+
+                if (pageEventDates.Count == 0)
+                {
+                    hasMorePages = false;
+                }
+
+                pageNumber++;
+            }
 
             if (eventDates.Count == 0)
             {
@@ -48,114 +73,61 @@ namespace FechasArtistas
                     richTextBox1.Text += eventDate + "\r\n";
                 }
             }
+
+
         }
-            
-        
-        private List<string> GetArtistEvents(string artista)
+
+
+        private List<string> GetArtistEvents(string url)
         {
             List<string> eventDates = new List<string>();
-            int page = 1;
 
-            while (true)
-            {
-                string pageUrl = $"https://www.setlist.fm/search?page={page}&query={artista.Replace(" ", "+")}";
-                List<string> pageEventDates = GetEventsOnPage(pageUrl);
-
-                if (pageEventDates.Count == 0)
-                {
-                    break;  // No hay más páginas
-                }
-
-                eventDates.AddRange(pageEventDates);
-                page++;
-            }
-
-            return eventDates;
-        }
-
-        private int GetTotalPages(string url, string artista)
-        {
             WebRequest request = WebRequest.Create(url);
             request.Credentials = CredentialCache.DefaultCredentials;
 
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-            if (response.StatusCode != HttpStatusCode.OK)
+            try
             {
-                throw new Exception("No se pudo obtener una respuesta. Estado = " + response.StatusCode);
-            }
+                
 
-            using (Stream dataStream = response.GetResponseStream())
-            {
-                if (dataStream == null)
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+                if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    throw new Exception("No se recibió respuesta.");
+                    throw new Exception("No se pudo obtener una respuesta. Estado = " + response.StatusCode);
                 }
-
-                using (StreamReader reader = new StreamReader(dataStream))
+                using (Stream dataStream = response.GetResponseStream())
                 {
-                    string html = reader.ReadToEnd();
-                    string pattern = $@"<a href=""search\?page=(\d+)&amp;query={artista.Replace(" ", "+")}"">(\d+)</a>";
-                    MatchCollection matches = Regex.Matches(html, pattern);
-
-                    int totalPages = 1;
-
-                    foreach (Match match in matches)
+                    if (dataStream == null)
                     {
-                        int currentPage = int.Parse(match.Groups[1].Value);
-                        if (currentPage > totalPages)
+                        throw new Exception("No se recibió respuesta.");
+                    }
+
+                    using (StreamReader reader = new StreamReader(dataStream))
+                    {
+                        string html = reader.ReadToEnd();
+
+                        string pattern = @"<div class=""condensed dateBlock"">\s*<span class=""month"">([^<]+)</span>\s*<span class=""day"">([^<]+)</span>\s*<span class=""year"">([^<]+)</span>";
+                        MatchCollection matches = Regex.Matches(html, pattern);
+
+                        foreach (Match match in matches)
                         {
-                            totalPages = currentPage;
+                            string month = match.Groups[1].Value;
+                            string day = match.Groups[2].Value;
+                            string year = match.Groups[3].Value;
+                            string eventDate = $"{month} {day}, {year}";
+                            eventDates.Add(eventDate);
                         }
                     }
-
-                    return totalPages;
                 }
             }
-        }
-
-        private List<string> GetEventsOnPage(string url)
-        {
-            List<string> eventDates = new List<string>();
-
-            WebRequest request = WebRequest.Create(url);
-            request.Credentials = CredentialCache.DefaultCredentials;
-
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-            if (response.StatusCode != HttpStatusCode.OK)
+            catch (WebException)
             {
-                throw new Exception("No se pudo obtener una respuesta. Estado = " + response.StatusCode);
-            }
-
-            using (Stream dataStream = response.GetResponseStream())
-            {
-                if (dataStream == null)
-                {
-                    throw new Exception("No se recibió respuesta.");
-                }
-
-                using (StreamReader reader = new StreamReader(dataStream))
-                {
-                    string html = reader.ReadToEnd();
-
-                    string pattern = @"<div class=""condensed dateBlock"">\s*<span class=""month"">([^<]+)</span>\s*<span class=""day"">([^<]+)</span>\s*<span class=""year"">([^<]+)</span>";
-                    MatchCollection matches = Regex.Matches(html, pattern);
-
-                    foreach (Match match in matches)
-                    {
-                        string month = match.Groups[1].Value;
-                        string day = match.Groups[2].Value;
-                        string year = match.Groups[3].Value;
-                        string eventDate = $"{month} {day}, {year}";
-                        eventDates.Add(eventDate);
-                    }
-                }
+                hasMorePages = false;
             }
 
             return eventDates;
+        
         }
-    
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
